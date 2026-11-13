@@ -576,6 +576,18 @@ async function takeAction(act, id) {
     }
     return;
   }
+  if (act === 'reportDates') {
+    chooseReportDates();
+    return;
+  }
+  if (act === 'reportExport') {
+    reportExportDialog();
+    return;
+  }
+  if (act === 'reportSummary' || act === 'reportOrders') {
+    downloadReport(act === 'reportOrders');
+    return;
+  }
   if (act === 'print') {
     window.print();
     return;
@@ -597,6 +609,7 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('input', e => {
+  if (e.target.form?.id === 'reportDates') e.target.form.elements.to.setCustomValidity('');
   if (e.target.id === 'q') {
     query = e.target.value;
     filters();
@@ -640,6 +653,17 @@ document.addEventListener('change', async e => {
     return;
   }
   switch (t.id) {
+    case 'reportChannel':
+      reportChannel = t.value;
+      break;
+    case 'reportPeriod':
+      if (t.value === 'custom') {
+        t.value = reportPeriod;
+        chooseReportDates();
+        return;
+      }
+      reportPeriod = t.value;
+      break;
     case 'period':
       period = Number(t.value);
       break;
@@ -678,6 +702,21 @@ document.addEventListener('submit', async e => {
       if (p) p.textContent = s;
       else toast(s);
     };
+
+  if (f.id === 'reportDates') {
+    const from = get('from'), to = get('to');
+    if (from > to) {
+      f.elements.to.setCustomValidity('Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.');
+      f.elements.to.reportValidity();
+      return;
+    }
+    reportCustomRange = { from, to };
+    reportPeriod = 'custom';
+    modal.close();
+    paint();
+    document.getElementById('reportPeriod')?.focus();
+    return;
+  }
 
   if (f.id === 'editform') {
     const id = get('pid'),

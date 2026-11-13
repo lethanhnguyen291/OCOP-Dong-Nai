@@ -211,11 +211,10 @@ const metric = (ico, label, value, note) =>
   note +
   '</small></div>';
 
-function chart(rows) {
-  let days = Array.from({ length: period }, (_, i) => pastDay(period - i - 1)),
-    v = days.map(d => sum(rows.filter(o => o.date === d), total)),
+function chart(series) {
+  const v = series.map(group => group.value),
     cap = Math.max(1000000, Math.ceil(Math.max(...v) / 500000) * 500000),
-    x = i => 60 + i * (530 / (days.length - 1)),
+    x = i => v.length === 1 ? 325 : 60 + i * (530 / (v.length - 1)),
     y = t => 166 - (t / cap) * 133;
   let pts = v.map((n, i) => x(i) + ',' + y(n)),
     path = 'M' + pts.join(' L');
@@ -233,13 +232,14 @@ function chart(rows) {
         '</text>'
     )
     .join('');
-  const slots = period === 7 ? [0, 1, 2, 3, 4, 5, 6] : [0, 5, 10, 15, 20, 25, 29];
+  const tickCount = Math.min(v.length, 7);
+  const slots = Array.from({ length: tickCount }, (_, i) => Math.round(i * (v.length - 1) / Math.max(1, tickCount - 1)));
   return (
-    '<svg class="chart" viewBox="0 0 610 201" role="img" aria-label="Doanh thu từng ngày tính bằng triệu đồng"><defs><linearGradient id="wash" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#487b51" stop-opacity=".38"/><stop offset="100%" stop-color="#487b51" stop-opacity=".02"/></linearGradient></defs><g font-size="12" font-family="Segoe UI,Arial" fill="#52685a"><text x="9" y="15">Triệu ₫</text>' +
+    '<svg class="chart" viewBox="0 0 610 201" role="img" aria-label="Doanh thu đơn hoàn tất trong kỳ, tính bằng triệu đồng"><defs><linearGradient id="wash" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#487b51" stop-opacity=".38"/><stop offset="100%" stop-color="#487b51" stop-opacity=".02"/></linearGradient></defs><g font-size="12" font-family="Segoe UI,Arial" fill="#52685a"><text x="9" y="15">Triệu ₫</text>' +
     axes +
     '<path d="' +
     path +
-    ' L590,166 L60,166 Z" fill="url(#wash)"/><path d="' +
+    ' L' + x(v.length - 1) + ',166 L' + x(0) + ',166 Z" fill="url(#wash)"/><path d="' +
     path +
     '" fill="none" stroke="#2d6a45" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
     v
@@ -250,9 +250,9 @@ function chart(rows) {
           '" cy="' +
           y(n) +
           '" r="' +
-          (period === 7 ? 4.5 : 2.5) +
+          (v.length <= 7 ? 4.5 : 2.5) +
           '" fill="#fff" stroke="#2d6a45" stroke-width="2.2"><title>' +
-          days[i].split('-').reverse().join('/') +
+          displayReportDate(series[i].from) + (series[i].from === series[i].to ? '' : ' – ' + displayReportDate(series[i].to)) +
           ': ' +
           money(n) +
           '</title></circle>'
@@ -264,9 +264,9 @@ function chart(rows) {
           '<text x="' +
           x(i) +
           '" y="190" text-anchor="middle">' +
-          days[i].slice(8) +
+          series[i].from.slice(8) +
           '/' +
-          days[i].slice(5, 7) +
+          series[i].from.slice(5, 7) +
           '</text>'
       )
       .join('') +
@@ -288,14 +288,16 @@ function rankBy(rows, key) {
 }
 
 function overview() {
-  const rows = periodOrders(period),
-    done = rows.filter(o => o.status === 'done'),
+  const report = salesReport();
+  const series = revenueSeries(report);
+  const rangeLabel = displayReportDate(report.from) + ' – ' + displayReportDate(report.to);
+  const done = report.done,
     prods = rankBy(done, 'pid'),
     crew = rankBy(done, 'aid'),
     p = product('DN01') || state.products[0];
 
   return (
-    head('Tổng quan bán hàng', 'Theo dõi tình hình kinh doanh của gian hàng trên ba sàn.', periodControl()) +
+    head('Tổng quan bán hàng', 'Đơn đặt từ ' + rangeLabel + ' · ' + esc(reportChannel || 'Tất cả sàn'), reportControls()) +
     pendingBox() +
     '<section class="hero"><div class="heroCopy"><div class="herotag">Góc thực hành · Chủ cơ sở & Đoàn viên</div><h2>Video đầu tiên của nhà vườn</h2><p class="caption">Chỉ cần điện thoại và 4 cảnh quay ngắn để giới thiệu đặc sản OCOP Đồng Nai lên Shopee, TikTok Shop và Lazada.</p><div class="heroActions">' +
     btn(ic('play', 13) + ' Mở mẫu quay 30 giây', 'startstudio', 'herobtn') +
@@ -304,13 +306,16 @@ function overview() {
     esc(productPhoto(p) || IMAGES[0]) +
     ')"><span class="photocap">Xoài Đồng Nai · Ảnh minh họa</span></div></section>' +
     '<div class="metrics">' +
-    metric('wallet', 'Doanh thu', money(sum(done, total)), 'Từ ' + num(done.length) + ' đơn hoàn tất (' + period + ' ngày)') +
-    metric('bag', 'Đơn hoàn tất', num(done.length), 'Trên Shopee, TikTok Shop & Lazada') +
+    metric('wallet', 'Doanh thu', money(sum(done, total)), 'Từ ' + num(done.length) + ' đơn hoàn tất trong kỳ') +
+    metric('bag', 'Đơn hoàn tất', num(done.length), esc(reportChannel || 'Trên cả ba sàn')) +
     metric('users', 'Hoa hồng đoàn viên', money(sum(done, commission)), 'Từ các đơn giới thiệu hoàn tất') +
     '</div>' +
-    '<div class="cols"><section class="card"><div class="cardhead"><h2>Doanh thu theo ngày</h2><span class="key">Doanh thu hoàn tất</span></div>' +
-    chart(done) +
+    '<div class="cols"><section class="card"><div class="cardhead"><h2>' +
+    (series[0].from === series[0].to ? 'Doanh thu theo ngày' : 'Doanh thu theo nhóm ngày') +
+    '</h2><span class="key">Đơn hoàn tất</span></div>' +
+    chart(series) +
     '</section><section class="card"><div class="cardhead"><h2>Sản phẩm bán chạy</h2><small>Theo doanh thu</small></div>' +
+    (!done.length ? '<p class="help">Chưa có đơn hoàn tất trong phạm vi đã chọn.</p>' : '') +
     prods
       .slice(0, 4)
       .map((a, i) => {
@@ -333,9 +338,11 @@ function overview() {
       })
       .join('') +
     '</section></div>' +
-    '<section class="card"><div class="cardhead"><h2>Đoàn viên nổi bật</h2>' +
+    channelBreakdown(report) +
+    '<section class="card sectiongap"><div class="cardhead"><h2>Đoàn viên nổi bật</h2>' +
     btn(ic('plus', 15) + ' Mời đoàn viên', 'invite', 'inline') +
     '</div><div class="twrap"><table><thead><tr><th>Đoàn viên</th><th class="r">Đơn hoàn tất</th><th class="r">Doanh thu giới thiệu</th><th class="r">Hoa hồng</th></tr></thead><tbody>' +
+    (!done.length ? '<tr><td colspan="4">Chưa có đơn giới thiệu hoàn tất trong kỳ.</td></tr>' : '') +
     crew
       .slice(0, 5)
       .map(

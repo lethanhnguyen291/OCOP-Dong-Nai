@@ -14,6 +14,11 @@ Nhấp đúp `index.html` bằng Chrome hoặc Edge. Giữ nguyên các thư m�
 6. Nhấn **Đến tổng quan để xác nhận → Xác nhận hoàn tất**. Mở **Đơn & hoa hồng** bằng đúng tài khoản đoàn viên để xem khoản đã ghi nhận. Hủy một đơn thử khác để kiểm tra trường hợp hoa hồng bằng 0.
 7. Sau khi trình diễn xong một lượt, có thể nhấn **Khôi phục dữ liệu mẫu** ở cuối thanh điều hướng bên trái để đặt lại toàn bộ dữ liệu về ban đầu.
 
+## Báo cáo doanh thu
+Trong **Tổng quan**, chọn 7 ngày, 30 ngày hoặc **Chọn ngày…**, rồi chọn một sàn hoặc tất cả sàn. Kỳ báo cáo tính theo ngày đặt đơn, gồm cả ngày đầu và cuối. Biểu đồ gộp ngày khi kỳ dài hơn 30 ngày. Doanh thu và hoa hồng ghi nhận chỉ tính đơn hoàn tất. Mục đơn thử chờ xử lý luôn hiển thị mọi đơn cần xác nhận.
+
+Chọn **Xuất báo cáo** và tải CSV tổng hợp theo sàn hoặc CSV chi tiết từng đơn. CSV chứa dữ liệu trong kỳ và sàn đang xem. Khi mở bằng Excel, nếu các cột chưa tách, nhập tệp dưới dạng UTF-8 và chọn dấu phẩy. Cột tiền dùng đơn vị đồng. Mỗi đơn dùng giá và tỷ lệ hoa hồng tại lúc đặt.
+
 ## Hồ sơ bàn giao
 - `ho-so/Pitch-deck-OCOP-Dong-Nai.pptx` — 10 slide có thể chỉnh sửa trong PowerPoint.
 - `ho-so/Mockup-6-man-hinh.pdf` — ba màn hình chủ cơ sở và ba màn hình đoàn viên, mỗi màn có bản máy tính và điện thoại.
