@@ -289,17 +289,17 @@ svg {
 /* Bố cục khung chính */
 #shell {
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 256px minmax(0, 1fr);
   min-height: 100vh;
 }
 
 #sidebar {
   background: #eff3ea;
   border-right: 1px solid var(--edge);
-  padding: 24px 16px 18px;
+  padding: 22px 15px 18px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
   position: sticky;
   top: 0;
   height: 100dvh;
@@ -338,18 +338,85 @@ svg {
   text-transform: uppercase;
 }
 
+/* Bộ chuyển đối tượng trong Sidebar */
+.sideroles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #e2ebe0;
+  padding: 4px;
+  border-radius: 11px;
+  border: 1px solid #d0dcd0;
+  gap: 4px;
+}
+
+.siderolebtn {
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: #496052;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.siderolebtn:hover {
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--pine);
+}
+
+.siderolebtn.active {
+  background: #ffffff;
+  color: var(--pine);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(18, 75, 59, 0.12);
+}
+
+.sideprofile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--edge);
+  border-radius: 11px;
+  padding: 9px 11px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sideprofile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sideprofile-info small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.sideprofile-info b {
+  display: block;
+  font-size: 13.5px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sidecap {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.11em;
   color: #5e7262;
   text-transform: uppercase;
-  margin: 6px 10px;
+  margin: 4px 10px 6px;
 }
 
 .nav {
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 
 .nav a {
@@ -362,6 +429,7 @@ svg {
   font-weight: 550;
   padding: 9px 12px;
   border-radius: 10px;
+  white-space: nowrap;
 }
 
 .nav a span:first-of-type {
@@ -1578,13 +1646,13 @@ footer {
 /* Đáp ứng thiết bị (Responsive) */
 @media (min-width: 1550px) {
   #shell {
-    grid-template-columns: 248px minmax(0, 1fr);
+    grid-template-columns: 264px minmax(0, 1fr);
   }
 }
 
 @media (max-width: 1090px) {
   #shell {
-    grid-template-columns: 195px minmax(0, 1fr);
+    grid-template-columns: 236px minmax(0, 1fr);
   }
   #sidebar {
     padding-inline: 12px;

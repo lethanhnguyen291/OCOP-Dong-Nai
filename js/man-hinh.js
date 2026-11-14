@@ -82,73 +82,92 @@ function dialog(title, html) {
 function topNav() {
   const pendingCount = state.orders.filter(o => o.status === 'pending' && o.id.startsWith('D')).length;
   const myLinksCount = state.links.filter(l => l.aid === state.active).length;
+  const isGuest = page === 'ref' || page === 'join';
+  const currentRows = navs[side] || navs.seller;
 
   const brand =
     '<span class="mark">' +
     ic('leaf', 26) +
     '</span><span><b>Nếp</b><small>OCOP Đồng Nai</small></span>';
 
-  document.querySelector('#sidebar').innerHTML =
-    '<a class="brand" href="#overview" aria-label="Nếp, trang tổng quan">' +
-    brand +
-    '</a>' +
-    Object.entries(navs)
-      .map(
-        ([r, rows]) =>
-          '<div class="navgroup"><div class="sidecap">' +
-          (r === 'seller' ? 'Chủ cơ sở' : 'Đoàn viên') +
-          '</div><nav class="nav" aria-label="' +
-          (r === 'seller' ? 'Ứng dụng người bán' : 'Ứng dụng affiliate') +
-          '">' +
-          rows
-            .map(([k, t, i]) => {
-              const badgeHtml =
-                k === 'overview' && pendingCount
-                  ? '<span class="navbadge warn" title="Đơn thử chờ xác nhận">' + pendingCount + '</span>'
-                  : k === 'links' && myLinksCount
-                  ? '<span class="navbadge">' + myLinksCount + '</span>'
-                  : '';
-              return (
-                '<a href="#' +
-                k +
-                '" ' +
-                (page === k ? 'class="on" aria-current="page"' : '') +
-                '>' +
-                ic(i) +
-                ' <span>' +
-                t +
-                '</span>' +
-                badgeHtml +
-                '</a>'
-              );
-            })
-            .join('') +
-          '</nav></div>'
-      )
-      .join('') +
-    '<div class="sidefoot">' +
-    btn(ic('book', 18) + ' Hồ sơ thí điểm', 'dossier', 'plain fullbtn') +
-    btn(ic('refresh', 17) + ' Khôi phục dữ liệu mẫu', 'resetdemo', 'plain fullbtn mutedbtn') +
-    '</div>';
-
-  const isGuest = page === 'ref' || page === 'join';
-  const identity = isGuest ? 'Khách trải nghiệm' : side === 'seller' ? 'Nhà vườn Đồng Nai' : activeName();
-
-  const roleSwitcher =
-    '<div class="roleswitch" role="group" aria-label="Chuyển nhanh vai trò">' +
-    '<button type="button" class="rolebtn ' +
-    (!isGuest && side === 'seller' ? 'active' : '') +
+  const sidebarRoleSwitch =
+    '<div class="sideroles" role="group" aria-label="Chọn đối tượng sử dụng">' +
+    '<button type="button" class="siderolebtn ' +
+    (side === 'seller' ? 'active' : '') +
     '" data-act="switchseller">' +
     ic('shop', 15) +
     ' <span>Chủ cơ sở</span>' +
     (pendingCount ? '<span class="pillcount">' + pendingCount + '</span>' : '') +
     '</button>' +
-    '<button type="button" class="rolebtn ' +
-    (!isGuest && side === 'aff' ? 'active' : '') +
+    '<button type="button" class="siderolebtn ' +
+    (side === 'aff' ? 'active' : '') +
     '" data-act="switchaff">' +
     ic('users', 15) +
     ' <span>Đoàn viên</span></button>' +
     '</div>';
+
+  const sidebarProfile =
+    side === 'aff'
+      ? '<div class="sideprofile"><span class="avatar">' +
+        esc(
+          activeName()
+            .split(' ')
+            .map(s => s[0])
+            .slice(-2)
+            .join('')
+        ) +
+        '</span><div class="sideprofile-info"><small>Tài khoản đoàn viên</small><b>' +
+        esc(activeName()) +
+        '</b></div>' +
+        btn(ic('switch', 14) + ' Đổi', 'person', 'plain switchbtn') +
+        '</div>'
+      : '<div class="sideprofile seller"><span class="avatar">' +
+        ic('shop', 16) +
+        '</span><div class="sideprofile-info"><small>Đơn vị quản lý</small><b>Nhà vườn Đồng Nai</b></div></div>';
+
+  document.querySelector('#sidebar').innerHTML =
+    '<a class="brand" href="#' +
+    (side === 'aff' ? 'discover' : 'overview') +
+    '" aria-label="Nếp, trang chính">' +
+    brand +
+    '</a>' +
+    sidebarRoleSwitch +
+    sidebarProfile +
+    '<div class="navgroup"><div class="sidecap">' +
+    (side === 'seller' ? 'Menu Chủ cơ sở' : 'Menu Đoàn viên') +
+    '</div><nav class="nav" aria-label="' +
+    (side === 'seller' ? 'Ứng dụng người bán' : 'Ứng dụng đoàn viên') +
+    '">' +
+    currentRows
+      .map(([k, t, i]) => {
+        const badgeHtml =
+          k === 'overview' && pendingCount
+            ? '<span class="navbadge warn" title="Đơn thử chờ xác nhận">' + pendingCount + '</span>'
+            : k === 'links' && myLinksCount
+            ? '<span class="navbadge">' + myLinksCount + '</span>'
+            : '';
+        return (
+          '<a href="#' +
+          k +
+          '" ' +
+          (page === k ? 'class="on" aria-current="page"' : '') +
+          '>' +
+          ic(i) +
+          ' <span>' +
+          t +
+          '</span>' +
+          badgeHtml +
+          '</a>'
+        );
+      })
+      .join('') +
+    '</nav></div>' +
+    '<div class="sidefoot">' +
+    btn(ic('book', 18) + ' Hồ sơ thí điểm', 'dossier', 'plain fullbtn') +
+    btn(ic('refresh', 17) + ' Khôi phục dữ liệu mẫu', 'resetdemo', 'plain fullbtn mutedbtn') +
+    '</div>';
+
+  const identity = isGuest ? 'Khách trải nghiệm' : side === 'seller' ? 'Nhà vườn Đồng Nai' : activeName();
 
   document.querySelector('#top').innerHTML =
     '<div class="row">' +
@@ -161,7 +180,7 @@ function topNav() {
     '<div class="crumb">' +
     ic(side === 'seller' ? 'shop' : 'compass', 16) +
     ' <span>' +
-    (isGuest ? 'Trải nghiệm khách' : rolelabel()) +
+    (isGuest ? 'Trải nghiệm khách' : 'Phân hệ ' + rolelabel()) +
     '</span> ' +
     ic('arr', 12) +
     ' <b>' +
@@ -169,7 +188,6 @@ function topNav() {
     '</b></div>' +
     '</div>' +
     '<div class="topactions">' +
-    roleSwitcher +
     '<div class="topidentity">' +
     '<span class="avatar">' +
     ic(isGuest ? 'user' : side === 'seller' ? 'shop' : 'user', 16) +
@@ -179,7 +197,7 @@ function topNav() {
     '</span><span class="role">' +
     (isGuest ? 'Bản thí điểm' : rolelabel()) +
     '</span></div>' +
-    (side === 'aff' && !isGuest ? btn(ic('switch', 15) + ' Đổi', 'person', 'plain switchbtn') : '') +
+    (side === 'aff' && !isGuest ? btn(ic('switch', 15) + ' Đổi tài khoản', 'person', 'plain switchbtn') : '') +
     '</div>' +
     '</div>';
 }
